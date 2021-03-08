@@ -62,8 +62,8 @@ class FaceDataset(Dataset):
             img_path = img_dir.joinpath(img_name + "_face.jpg")
             assert(img_path.is_file())
             self.x.append(str(img_path))
-            self.y.append(row["apparent_age_avg"])
-            self.std.append(row["apparent_age_std"])
+            self.y.append(row["real_age"])
+            #self.std.append(row["apparent_age_std"])
 
     def __len__(self):
         return len(self.y)
