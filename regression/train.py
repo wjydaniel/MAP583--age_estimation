@@ -182,7 +182,7 @@ def main():
         cudnn.benchmark = True
 
     criterion = nn.L1Loss().to(device)
-    train_dataset = FaceDataset(args.data_dir, "train", img_size=cfg.MODEL.IMG_SIZE, augment=False,
+    train_dataset = FaceDataset(args.data_dir, "train", img_size=cfg.MODEL.IMG_SIZE, augment=True,
                                 age_stddev=cfg.TRAIN.AGE_STDDEV)
     train_loader = DataLoader(train_dataset, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=True,
                               num_workers=cfg.TRAIN.WORKERS, drop_last=True)

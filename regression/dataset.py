@@ -1,5 +1,5 @@
 import argparse
-import better_exceptions
+#import better_exceptions
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -63,7 +63,7 @@ class FaceDataset(Dataset):
             assert(img_path.is_file())
             self.x.append(str(img_path))
             self.y.append(row["real_age"])
-            #self.std.append(row["apparent_age_std"])
+            self.std.append(row["apparent_age_std"])
 
     def __len__(self):
         return len(self.y)
