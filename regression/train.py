@@ -61,18 +61,18 @@ def train(train_loader, model, criterion, optimizer, epoch, device):
     with tqdm(train_loader) as _tqdm:
         for x, y in _tqdm:
             x = x.to(device)
-            y = y.to(device)
+            y = y.to(device).squeeze()
 
             # compute output
-            outputs = model(x)
+            outputs = model(x).squeeze()
 
             # calc loss
             loss = criterion(outputs, y)
             cur_loss = loss.item()
 
             # calc accuracy
-            _, predicted = outputs.max(1)
-            correct_num = predicted.eq(y).sum().item()
+            predicted = outputs
+            correct_num = predicted.round().eq(y).sum().item()
 
             # measure accuracy and record loss
             sample_num = x.size(0)
@@ -101,11 +101,11 @@ def validate(validate_loader, model, criterion, epoch, device):
         with tqdm(validate_loader) as _tqdm:
             for i, (x, y) in enumerate(_tqdm):
                 x = x.to(device)
-                y = y.to(device)
+                y = y.to(device).squeeze()
 
                 # compute output
-                outputs = model(x)
-                preds.append(F.softmax(outputs, dim=-1).cpu().numpy())
+                outputs = model(x).squeeze()
+                preds.append(outputs.cpu().numpy())
                 gt.append(y.cpu().numpy())
 
                 # valid for validation, not used for test
@@ -115,8 +115,8 @@ def validate(validate_loader, model, criterion, epoch, device):
                     cur_loss = loss.item()
 
                     # calc accuracy
-                    _, predicted = outputs.max(1)
-                    correct_num = predicted.eq(y).sum().item()
+                    predicted = outputs
+                    correct_num = predicted.round().eq(y).sum().item()
 
                     # measure accuracy and record loss
                     sample_num = x.size(0)
@@ -127,9 +127,9 @@ def validate(validate_loader, model, criterion, epoch, device):
 
     preds = np.concatenate(preds, axis=0)
     gt = np.concatenate(gt, axis=0)
-    ages = np.arange(0, 101)
-    ave_preds = (preds * ages).sum(axis=-1)
-    diff = ave_preds - gt
+    #ages = np.arange(0, 101)
+    #ave_preds = (preds * ages).sum(axis=-1)
+    diff = preds - gt
     mae = np.abs(diff).mean()
 
     return loss_monitor.avg, accuracy_monitor.avg, mae
@@ -181,8 +181,8 @@ def main():
     if device == "cuda":
         cudnn.benchmark = True
 
-    criterion = nn.CrossEntropyLoss().to(device)
-    train_dataset = FaceDataset(args.data_dir, "train", img_size=cfg.MODEL.IMG_SIZE, augment=True,
+    criterion = nn.L1Loss().to(device)
+    train_dataset = FaceDataset(args.data_dir, "train", img_size=cfg.MODEL.IMG_SIZE, augment=False,
                                 age_stddev=cfg.TRAIN.AGE_STDDEV)
     train_loader = DataLoader(train_dataset, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=True,
                               num_workers=cfg.TRAIN.WORKERS, drop_last=True)
